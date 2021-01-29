@@ -30,40 +30,71 @@ class EcwidAPI:
         an "attributes" field which contains the common fields "Brand",
         "UPC" and also custom attributes.
         '''
-        
-        #product_classes = []
-        
         result = self.__get_api_request('classes')
         return result
 
-        # for item in result:
-        #     #pprint(item)
-        #     p = ProductClass(**item)
-        #     print('My item is {0}'.format(type(p)))    
-        #     product_classes.append(p)
-        
-        # print('I have {0}'.format(len(product_classes)))
-        # return product_classes
 
-    def products(self):
-        '''Returns a List containg the contents of /products "items"
-        element (as a dict)
+
+    def product(self,product_id):
+        ''' Get product details
+            Returns: {product}
         https://api-docs.ecwid.com/reference/products
         '''
+        product_id = self.__get_str_of_id_or_false(product_id)
+        if not product_id:
+            return
+        
+        endpoint = 'products/' + product_id
+        print(endpoint)
+        result = self.__get_api_request(endpoint)
+        return result
 
-        #products = []
+    def product_combinations(self,product_id):
+        ''' Get all combinations for a product
+            Returns: List[{combinations}]
+        https://api-docs.ecwid.com/reference/products
+        '''
+        product_id = self.__get_str_of_id_or_false(product_id)
+        if not product_id:
+            return
+        
+        endpoint = 'products/' + product_id + '/combinations'
+        print(endpoint)
+        result = self.__get_api_request(endpoint)
+        return result
+
+    def products(self):
+        ''' Search for all products
+            Returns: List[{product},{product}]
+        https://api-docs.ecwid.com/reference/products
+        '''
 
         result = self.__get_api_request('products')
         return result
         
-        # for item in result:
-        #     #pprint(item)
-        #     p = Product(**item)
-        #     #print('My item is {0}'.format(type(p)))    
-        #     products.append(p)
+    def products_by_keyword(self,keyword):
+        ''' Search products by keyword
+            Returns: List[{product},{product}]
+        https://api-docs.ecwid.com/reference/products
+        '''
+        params = { 'keyword': keyword }
 
-        # print('I have {0}'.format(len(products)))
-        
+        result = self.__get_api_request('products',params)
+        return result 
+
+    def products_by_params(self,params):
+        ''' Here be dragons!
+            Search products by paramaters specified in dict.
+            Eg:  { 'keyword': 'dragons', 'updatedFrom': '2011-05-01' }
+            Returns: List[{product},{product}]
+        https://api-docs.ecwid.com/reference/products
+        '''
+        if type(params) != dict:
+            return
+
+        result = self.__get_api_request('products',params)
+        return result 
+
 
 
     def __get_feature_url(self, endpoint):
@@ -71,12 +102,11 @@ class EcwidAPI:
         return feature_url
 
 
-    def __get_api_request(self, endpoint):
+    def __get_api_request(self, endpoint, payload={}):
         feature_url = self.__get_feature_url(endpoint)
 
-        payload = { 
-            'token': self.api_token,
-            'limit': API_PAGE_LIMIT }
+        payload['token'] =  self.api_token
+        payload['limit'] = API_PAGE_LIMIT
         
         if self.__endpoint_paging(endpoint):
             if self.debug:
@@ -141,3 +171,21 @@ class EcwidAPI:
     # def __get(self, url, object_hook=None):
     #     with urlopen(url) as resource:
     #         return json.load(resource, object_hook=object_hook)
+
+    def __get_str_of_id_or_false(self,item_id):
+        ''' Sanity check.  
+        * Returns a string if int.
+        * Checks a string is intable.
+        * Returns false otherwise.
+        '''
+        if type(item_id) == int:
+            item_id = str(item_id)
+            return item_id
+        elif type(item_id) == str:
+            try:
+                int(item_id)
+                return item_id
+            except ValueError:
+                return False
+        else:
+            return False
