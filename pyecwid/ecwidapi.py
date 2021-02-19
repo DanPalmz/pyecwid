@@ -1,10 +1,11 @@
-import requests
+from collections.abc import Mapping
 import json
-import urllib.parse
-from urllib.request import urlopen
 from pprint import pprint
-#from pyecwid.classes import *
+import requests
+import urllib.parse
 
+#from urllib.request import urlopen
+#from pyecwid.classes import *
 #from types import SimpleNamespace
 
 API_BASE_URL = 'https://app.ecwid.com/api/v3/{0}/'
@@ -14,8 +15,11 @@ DEBUG = False
 class EcwidAPI:
 
     def __init__(self, api_token, store_id):
+        if len(api_token) < 5:
+            raise ValueError('api_token must be provided')
         self.api_token = api_token
-        self.store_id = store_id
+        self.store_id = self.__get_str_of_value_or_false(store_id)
+        #self.store_id = store_id
         self.base_url = API_BASE_URL.format(store_id)
         self.debug = DEBUG
 
@@ -34,34 +38,90 @@ class EcwidAPI:
         return result
 
 
+    def product_combinations(self,product_id):
+        ''' Get all combinations for a product
+            Returns: List[{combinations}]
+        https://api-docs.ecwid.com/reference/products
+        '''
+        product_id = self.__get_str_of_value_or_false(product_id)
+        if not product_id:
+            raise ValueError("product_id not a valid number", product_id)
+        
+        endpoint = 'products/' + product_id + '/combinations'
+        #print(endpoint)
+        result = self.__get_api_request(endpoint)
+        return result
 
     def product(self,product_id):
         ''' Get product details
             Returns: {product}
         https://api-docs.ecwid.com/reference/products
         '''
-        product_id = self.__get_str_of_id_or_false(product_id)
+        product_id = self.__get_str_of_value_or_false(product_id)
         if not product_id:
-            return
+            raise ValueError("product_id not a valid number", product_id)
         
         endpoint = 'products/' + product_id
-        print(endpoint)
+        #print(endpoint)
         result = self.__get_api_request(endpoint)
         return result
 
-    def product_combinations(self,product_id):
-        ''' Get all combinations for a product
-            Returns: List[{combinations}]
-        https://api-docs.ecwid.com/reference/products
+
+    def product_add(self,product):
+        ''' Adds a single product.
+            Returns product_id
+            Requires product to be a dict with valid product structure
         '''
-        product_id = self.__get_str_of_id_or_false(product_id)
+        if not isinstance(product, Mapping):
+            raise ValueError("product format not valid")
+        elif len(product) == 0:
+            raise ValueError("product should not be empty")
+
+        result = self.__post_api_request('products',product)
+
+        if result.status_code != 200:
+            raise UserWarning("Prouct not created.", result.status_code, result.text)
+
+        return result.json()['id']
+
+    def product_delete(self,product_id):
+        ''' Deletes a single product.
+            Returns deleteCount int
+        '''
+
+        product_id = self.__get_str_of_value_or_false(product_id)
         if not product_id:
-            return
-        
-        endpoint = 'products/' + product_id + '/combinations'
-        print(endpoint)
-        result = self.__get_api_request(endpoint)
-        return result
+            raise ValueError("product_id not a valid number", product_id)
+        else:
+            endpoint = 'products/' + product_id
+
+        result = self.__delete_api_request(endpoint)
+
+        if result.status_code != 200:
+            raise UserWarning("Product not deleted.", result.status_code, result.text)
+
+        return result.json()['deleteCount']
+
+
+
+    def product_update(self,product_id,values):
+        ''' Update a single product.
+            Requires values to update in dict
+        '''
+        product_id = self.__get_str_of_value_or_false(product_id)
+        if not product_id:
+            raise ValueError("product_id not a valid number", product_id)
+            
+        else:
+            endpoint = 'products/' + product_id
+
+        if not isinstance(values, Mapping):
+            raise ValueError("values format not valid")
+        elif len(values) == 0:
+            raise ValueError("values should not be empty")
+
+        result = self.__put_api_request(endpoint,values)
+        return result 
 
     def products(self):
         ''' Search for all products
@@ -97,6 +157,14 @@ class EcwidAPI:
 
 
 
+    def __delete_api_request(self, endpoint):
+        url = self.__get_feature_url(endpoint)
+     
+        payload = { 'token': self.api_token }
+        result = requests.delete(url, params=payload)
+        return result
+
+
     def __get_feature_url(self, endpoint):
         feature_url = urllib.parse.urljoin(self.base_url, endpoint)
         return feature_url
@@ -117,6 +185,24 @@ class EcwidAPI:
 
         if self.debug:
             print ('Fetch returned: {0} Size: {1}'.format(type(result),len(result)))
+
+        return result
+
+    def __post_api_request(self, endpoint, values):
+        url = self.__get_feature_url(endpoint)
+        
+        payload = { 'token': self.api_token }
+        
+        result = requests.post(url, params=payload, json=values)
+
+        return result
+
+    def __put_api_request(self, endpoint, values):
+        url = self.__get_feature_url(endpoint)
+        
+        payload = { 'token': self.api_token }
+
+        result = requests.put(url, params=payload, json=values)
 
         return result
 
@@ -172,7 +258,7 @@ class EcwidAPI:
     #     with urlopen(url) as resource:
     #         return json.load(resource, object_hook=object_hook)
 
-    def __get_str_of_id_or_false(self,item_id):
+    def __get_str_of_value_or_false(self,item_id):
         ''' Sanity check.  
         * Returns a string if int.
         * Checks a string is intable.

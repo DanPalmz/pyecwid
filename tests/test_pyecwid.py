@@ -1,43 +1,110 @@
-from pyecwid import EcwidAPI
 import json
+import os
 from pprint import pprint
+from pyecwid import EcwidAPI
+import pytest
+import pytest_dependency
+import pytest_dotenv
+import time
 
-TEST_API_TOKEN = ''
-TEST_API_STORE = ''
+API_TOKEN = os.getenv("API_TOKEN")
+API_STORE = os.getenv("API_STORE")
 
-def test_product_list():
-    """Tests the API call to ensure products are returned"""
-    pass
+SLEEP_TIME = 5
 
-def test_base_url():
-    """Tests our instance is created and can return the API URL correctly"""
-    test_ecwid = EcwidAPI('my_token','my_store')
+@pytest.fixture
+def test_ecwid():
+    return EcwidAPI('my_token','my_store')
+
+@pytest.fixture
+def live_ecwid():
+    return EcwidAPI(API_TOKEN,API_STORE)
+
+@pytest.fixture
+def dummy_product():
+    with open('./tests/samplejson/product.json') as json_file:
+        return json.load(json_file)
+
+@pytest.fixture
+def dummy_product_id(dummy_product, live_ecwid):
+    dummy_product_sku = dummy_product['sku']
+    product_search = live_ecwid.products_by_keyword(dummy_product_sku)
+    if len(product_search) > 0:
+        return product_search[0]['id']
+
+def test_base_url(test_ecwid):
+    """Tests our instance is created and can return the API URL correctly""" 
     base_url = test_ecwid.get_base_url()
     assert base_url == 'https://app.ecwid.com/api/v3/my_store/'
 
-def test_products():
-    test_ecwid = EcwidAPI(TEST_API_TOKEN,TEST_API_STORE)
-    test_ecwid.debug = True
-    result = test_ecwid.products()
-    usb_list = list(filter(lambda result: 'USB' in result.get('name'), result))
-    pprint(usb_list)
-    assert usb_list[0]['id'] == 271343630
 
-def test_products_classes():
-    test_ecwid = EcwidAPI(TEST_API_TOKEN,TEST_API_STORE)
-    result = test_ecwid.product_classes()
-    attributes = result[0].get('attributes')
-    #pprint(attributes)
-    assert attributes[0]['type'] == 'UPC'
+def test_product_malformed_id_raises_error(test_ecwid):
+    with pytest.raises(Exception, match='product_id not a valid number') as e:
+        result = test_ecwid.product('id1234')
+        assert e.type is ValueError
 
 
-def test_current():
-    """Whatever I'm testing"""
-    #test_ecwid = EcwidAPI(TEST_API_TOKEN,TEST_API_STORE)
-    #test_ecwid.debug = True
+def test_product_combinations_malformed_id_raises_error(test_ecwid):
+    with pytest.raises(Exception, match='product_id not a valid number') as e:
+        result = test_ecwid.product_combinations('id1234')
+        assert e.type is ValueError
 
-    #result = test_ecwid.product_classes()
 
-    assert True
+def test_product_add_empty_dict_raises_errors(test_ecwid):
+    product = {}
+    with pytest.raises(Exception, match='product should not be empty') as e:
+        result = test_ecwid.product_add(product)
+        assert e.type is ValueError
+        
+
+def test_product_update_malformed_id_raises_errors(test_ecwid):
+    product = {}
+    with pytest.raises(Exception, match='product_id not a valid number') as e:
+        result = test_ecwid.product_update('id1234', product)
+        assert e.type is ValueError
+
+
+def test_product_update_empty_dict_raises_errors(test_ecwid):
+    product = {}
+    with pytest.raises(Exception, match='values should not be empty') as e:
+        result = test_ecwid.product_update('1234',product)
+        assert e.type is ValueError
+
+
+@pytest.mark.dependency()
+def test_products_retrieves_products(live_ecwid):
+    result = live_ecwid.products()
+    assert len(result) > 1
+
+
+@pytest.mark.dependency(depends=["test_products_retrieves_products"])
+def test_product_remove_dummy_data_if_necessary(live_ecwid, dummy_product, dummy_product_id):
+    if dummy_product_id:
+        result = live_ecwid.product_delete(dummy_product_id)
+        assert result == 1, "1 item removed"
+    else:
+        pass
+
+@pytest.mark.dependency(depends=["test_product_remove_dummy_data_if_necessary"])
+def test_product_add_dummy_data(live_ecwid, dummy_product):
+    result = live_ecwid.product_add(dummy_product)
+    
+    # Sleep:  Server wasn't updating quick enough for tests following this one..
+    time.sleep(SLEEP_TIME)
+    assert isinstance(result, int)
+    
+    
+
+@pytest.mark.dependency(depends=["test_product_add_dummy_data"])
+def test_product_update_changes_values(live_ecwid, dummy_product_id):
+
+    updated_data = { 
+        'name': 'Name set at {0}'.format(time.strftime("%H:%M:%S", time.localtime()))
+    }
+    update_result = live_ecwid.product_update(dummy_product_id, updated_data)
+
+    confirm_name_updated = live_ecwid.product(dummy_product_id)['name']
+    assert confirm_name_updated == updated_data['name']
+
 
 

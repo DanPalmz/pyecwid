@@ -1,0 +1,60 @@
+{
+    "sku": "000012199",
+    "quantity": 10,
+    "name": "New Product",
+    "nameTranslated": {
+      "en": "New Product",
+      "es": "Nuevo producto"
+    },
+    "price": 20.99,
+    "compareToPrice": 24.99,
+    "isShippingRequired": false,
+    "weight": 10,
+    "enabled": true,
+    "description": "A <b>new</b> product description",
+    "productClassId": 0,
+    "created":"2014-01-01",
+    "fixedShippingRateOnly": false,
+    "fixedShippingRate": 1.2,
+    "options": [
+      {
+        "type": "RADIO",
+        "name": "Size",
+        "nameTranslated": {
+          "en": "Size",
+          "es": "Tamaño"
+        },
+        "choices": [
+          {
+            "text": "Small",
+            "textTranslated": {
+              "en": "Small",
+              "es": "Pequeño"
+            },
+            "priceModifier": 0,
+            "priceModifierType": "ABSOLUTE"
+          },
+          {
+            "text": "Large",
+            "textTranslated": {
+              "en": "Large",
+              "es": "Pequeño"
+            },
+            "priceModifier": 0.5,
+            "priceModifierType": "ABSOLUTE"
+          }
+        ],
+          "defaultChoice": 0,
+          "required": false
+      }
+    ],
+    "shipping": {
+      "type": "SELECTED_METHODS",
+      "methodMarkup": 0,
+      "flatRate": 0,
+      "disabledMethods": [
+        "1396442138-1534946367952"
+      ],
+      "enabledMethods": []
+    }
+  }
