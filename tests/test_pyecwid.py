@@ -14,7 +14,7 @@ SLEEP_TIME = 5
 
 @pytest.fixture
 def test_ecwid():
-    return EcwidAPI('my_token','my_store')
+    return EcwidAPI('public_1','my_store')
 
 @pytest.fixture
 def live_ecwid():
@@ -32,6 +32,16 @@ def dummy_product_id(dummy_product, live_ecwid):
     if len(product_search) > 0:
         return product_search[0]['id']
 
+def test_ecwidapi_requires_token_is_string():
+    with pytest.raises(Exception, match='api_token must be a valid string') as e:
+        error_ecwid = EcwidAPI(123456,'12345')
+        assert e.type is ValueError
+
+def test_ecwidapi_requires_token_matches_public_or_secret():
+    with pytest.raises(Exception, match='api_token must be a valid public or secret token string') as e:
+        error_ecwid = EcwidAPI('blah_12345','12345')
+        assert e.type is ValueError
+
 def test_base_url(test_ecwid):
     """Tests our instance is created and can return the API URL correctly""" 
     base_url = test_ecwid.get_base_url()
@@ -44,11 +54,26 @@ def test_product_malformed_id_raises_error(test_ecwid):
         assert e.type is ValueError
 
 
-def test_product_combinations_malformed_id_raises_error(test_ecwid):
+def test_product_variations_malformed_id_raises_error(test_ecwid):
     with pytest.raises(Exception, match='product_id not a valid number') as e:
-        result = test_ecwid.product_combinations('id1234')
+        result = test_ecwid.product_variations('id1234')
         assert e.type is ValueError
 
+
+def test_product_variation_update_malformed_id_raises_error(test_ecwid):
+    with pytest.raises(Exception, match='product_id not a valid number') as e:
+        result = test_ecwid.product_variation_update('abc1234','1234',{ 'value': 'value'})
+        assert e.type is ValueError
+
+def test_product_variation_update_malformed_variation_id_raises_error(test_ecwid):
+    with pytest.raises(Exception, match='variation_id not a valid number') as e:
+        result = test_ecwid.product_variation_update('1234',12.234,{'value': 'value'})
+        assert e.type is ValueError
+
+def test_product_variation_update_empty_values_raises_error(test_ecwid):
+    with pytest.raises(Exception, match='values should not be empty') as e:
+        result = test_ecwid.product_variation_update('1234','1234',{})
+        assert e.type is ValueError
 
 def test_product_add_empty_dict_raises_errors(test_ecwid):
     product = {}
@@ -70,6 +95,9 @@ def test_product_update_empty_dict_raises_errors(test_ecwid):
         result = test_ecwid.product_update('1234',product)
         assert e.type is ValueError
 
+def test_products_classes_retrieves_at_least_one_product_class(live_ecwid):
+    result = live_ecwid.product_classes()
+    assert len(result) >= 1
 
 @pytest.mark.dependency()
 def test_products_retrieves_products(live_ecwid):

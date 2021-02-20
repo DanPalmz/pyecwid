@@ -15,11 +15,15 @@ DEBUG = False
 class EcwidAPI:
 
     def __init__(self, api_token, store_id):
-        if len(api_token) < 5:
-            raise ValueError('api_token must be provided')
-        self.api_token = api_token
+        if type(api_token) == str:
+            if api_token.startswith(('secret_','public_')):
+                self.api_token = api_token
+            else:
+                raise ValueError('api_token must be a valid public or secret token string')
+        else:
+            raise ValueError('api_token must be a valid string')
+
         self.store_id = self.__get_str_of_value_or_false(store_id)
-        #self.store_id = store_id
         self.base_url = API_BASE_URL.format(store_id)
         self.debug = DEBUG
 
@@ -37,20 +41,6 @@ class EcwidAPI:
         result = self.__get_api_request('classes')
         return result
 
-
-    def product_combinations(self,product_id):
-        ''' Get all combinations for a product
-            Returns: List[{combinations}]
-        https://api-docs.ecwid.com/reference/products
-        '''
-        product_id = self.__get_str_of_value_or_false(product_id)
-        if not product_id:
-            raise ValueError("product_id not a valid number", product_id)
-        
-        endpoint = 'products/' + product_id + '/combinations'
-        #print(endpoint)
-        result = self.__get_api_request(endpoint)
-        return result
 
     def product(self,product_id):
         ''' Get product details
@@ -123,6 +113,40 @@ class EcwidAPI:
         result = self.__put_api_request(endpoint,values)
         return result 
 
+    def product_variations(self,product_id):
+        ''' Get all variations/combinations for a product
+            Returns: List[{combinations}]
+        https://api-docs.ecwid.com/reference/products
+        '''
+        product_id = self.__get_str_of_value_or_false(product_id)
+        if not product_id:
+            raise ValueError("product_id not a valid number", product_id)
+        
+        endpoint = 'products/' + product_id + '/combinations'
+        result = self.__get_api_request(endpoint)
+        return result
+
+    def product_variation_update(self,product_id,varation_id,values):
+        ''' Update a single variation/combination on a product.
+            Requires values to update in dict
+        '''
+        product_id = self.__get_str_of_value_or_false(product_id)
+        if not product_id:
+            raise ValueError("product_id not a valid number", product_id)
+        varation_id = self.__get_str_of_value_or_false(varation_id)
+        if not varation_id:
+            raise ValueError("variation_id not a valid number", varation_id)
+        if not isinstance(values, Mapping):
+            raise ValueError("values format not valid")
+        elif len(values) == 0:
+            raise ValueError("values should not be empty")
+
+        endpoint = 'products/' + product_id + '/combinations/' + varation_id
+        
+        result = self.__put_api_request(endpoint,values)
+        return result
+
+
     def products(self):
         ''' Search for all products
             Returns: List[{product},{product}]
@@ -154,7 +178,6 @@ class EcwidAPI:
 
         result = self.__get_api_request('products',params)
         return result 
-
 
 
     def __delete_api_request(self, endpoint):

@@ -5,17 +5,34 @@ Python wrapper for Ecwid REST API
 1. See requirements.txt
 2. API token and Store ID from [Ecwid CP](https://my.ecwid.com/) Apps -> My Apps
 
-## Implemented Features ##
+## Implemented Features - Product CRUD ##
 * Product
     * product(id) - get product details
-    * product_combinations(id) - get all combinations for a product
+    * product_add(product) - add product (dict)
+    * product_delete(id) - remove product
+    * product_update(id, {values}) - update product with values (dict)
+    * product_variations(product_id) - get all variations/combinations for a product
+    * product_varation_update(product_id, variation_id, {values}) - update one item varation with values (dict)
+
 * Products
     * products() - return all products
-    * products_by_keyword('keyword')
-    * products_by_params({dict of search paramaters})
+    * products_by_keyword('keyword') - search products for keyword
+    * products_by_params({params}) - pass dict of paramaters to products API
+ 
 * Product types (classes)
     * product_classes() - return all configured product types in the store
 
+### Sample:  Search products for items matching keyword Sunglasses
+```python
+from pprint import pprint
+from pyecwid import EcwidAPI
+
+ecwid = EcwidAPI('public_ASDF','1234567')
+
+items = ecwid.products_by_keyword('Sunglasses')
+
+pprint(items)
+```
 ### Sample:  Return all products and create a list of items with 'USB' in the name.
 ```python
 from pyecwid import EcwidAPI
