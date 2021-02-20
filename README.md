@@ -22,14 +22,14 @@ Python wrapper for Ecwid REST API
 * Product types (classes)
     * product_classes() - return all configured product types in the store
 
-### Sample:  Search products for items matching keyword Sunglasses
+### Sample:  Search products for items matching keyword 'sunglasses'
 ```python
 from pprint import pprint
 from pyecwid import EcwidAPI
 
 ecwid = EcwidAPI('public_ASDF','1234567')
 
-items = ecwid.products_by_keyword('Sunglasses')
+items = ecwid.products_by_keyword('sunglasses')
 
 pprint(items)
 ```
