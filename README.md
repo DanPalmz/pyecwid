@@ -62,5 +62,3 @@ items = ecwid.products_by_params(params)
 
 pprint(items)
 ```
-### More advanced processing ###
-Functions for client side processing of the data returned by the EcwidAPI class have been included in ecwidutils.py.  Look under [samples](./samples/) for usage.

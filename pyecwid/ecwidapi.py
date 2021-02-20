@@ -4,10 +4,6 @@ from pprint import pprint
 import requests
 import urllib.parse
 
-#from urllib.request import urlopen
-#from pyecwid.classes import *
-#from types import SimpleNamespace
-
 API_BASE_URL = 'https://app.ecwid.com/api/v3/{0}/'
 API_PAGE_LIMIT = 100
 DEBUG = False
