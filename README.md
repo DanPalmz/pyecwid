@@ -1,10 +1,13 @@
 # pyecwid
 Python wrapper for Ecwid REST API
-
 ## Requirements
-1. See requirements.txt
-2. API token and Store ID from [Ecwid CP](https://my.ecwid.com/) Apps -> My Apps
-
+1. API token and Store ID from [Ecwid CP](https://my.ecwid.com/) Apps -> My Apps
+2. Python 3
+3. [Requests](https://pypi.org/project/requests/)
+## Installation
+```console
+$ python -m pip install pyecwid
+```
 ## Implemented Features - Product CRUD ##
 * Product
     * product(id) - get product details
