@@ -1,6 +1,4 @@
 from collections.abc import Mapping
-import json
-from pprint import pprint
 import requests
 import urllib.parse
 
@@ -272,8 +270,8 @@ class EcwidAPI:
         feature_url = urllib.parse.urljoin(self.base_url, endpoint)
         return feature_url
 
-    def __get_str_of_value_or_false(self,item_id):
-        ''' Sanity check.  
+    def __get_str_of_value_or_false(self, item_id):
+        ''' Sanity check.
         * Returns a string if int.
         * Checks a string is intable.
         * Returns false otherwise.

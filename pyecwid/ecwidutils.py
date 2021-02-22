@@ -25,3 +25,4 @@ def exec_on_items(items, function_for_items, function_for_combinations):
                 result += func_result
 
     return result
+    
