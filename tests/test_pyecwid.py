@@ -50,7 +50,7 @@ def test_ecwidapi_requires_token_matches_public_or_secret():
 
 
 def test_base_url(test_ecwid):
-    """Tests our instance is created and can return the API URL correctly""" 
+    """Tests our instance is created and can return the API URL correctly"""
     base_url = test_ecwid.get_base_url()
     assert base_url == 'https://app.ecwid.com/api/v3/my_store/'
 
@@ -105,9 +105,11 @@ def test_product_update_empty_dict_raises_errors(test_ecwid):
         result = test_ecwid.product_update('1234', product)
         assert e.type is ValueError
 
+
 def test_products_classes_retrieves_at_least_one_product_class(live_ecwid):
     result = live_ecwid.product_classes()
     assert len(result) >= 1
+
 
 @pytest.mark.dependency()
 def test_products_retrieves_products(live_ecwid):
@@ -123,6 +125,7 @@ def test_product_remove_dummy_data_if_necessary(live_ecwid, dummy_product, dummy
     else:
         pass
 
+
 @pytest.mark.dependency(depends=["test_product_remove_dummy_data_if_necessary"])
 def test_product_add_dummy_data(live_ecwid, dummy_product):
     result = live_ecwid.product_add(dummy_product)
@@ -130,13 +133,12 @@ def test_product_add_dummy_data(live_ecwid, dummy_product):
     # Sleep:  Server wasn't updating quick enough for tests following this one..
     time.sleep(SLEEP_TIME)
     assert isinstance(result, int)
-    
-    
+
 
 @pytest.mark.dependency(depends=["test_product_add_dummy_data"])
 def test_product_update_changes_values(live_ecwid, dummy_product_id):
 
-    updated_data = { 
+    updated_data = {
         'name': 'Name set at {0}'.format(time.strftime("%H:%M:%S", time.localtime()))
     }
     update_result = live_ecwid.product_update(dummy_product_id, updated_data)

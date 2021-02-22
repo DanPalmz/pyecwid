@@ -20,14 +20,14 @@ class EcwidAPI:
         api_token:  The secret_ or public_ token for your store.
         store_id:   The ID of your store.
         skip_test:  Optional: skips test call to API during initiaization (used in tests)
-        base_url:   Optional: Replace the hard coded URL 
+        base_url:   Optional: Replace the hard coded URL
                         Note: format includes {0} for store_id
                         Eg: 'https://app.ecwid.com/api/v3/{0}/'
     """
 
     def __init__(self, api_token, store_id, skip_test=False, base_url=API_BASE_URL):
         if type(api_token) == str:
-            if api_token.startswith(('secret_','public_')):
+            if api_token.startswith(('secret_', 'public_')):
                 self.api_token = api_token
             else:
                 raise ValueError('api_token must be a valid public or secret token string')
@@ -37,7 +37,7 @@ class EcwidAPI:
         self.store_id = self.__get_str_of_value_or_false(store_id)
         self.base_url = base_url.format(store_id)
         self.debug = DEBUG
-        if not skip_test: 
+        if not skip_test:
             self.__test_api_key()
 
     def get_base_url(self):
@@ -118,7 +118,7 @@ class EcwidAPI:
             raise ValueError("values should not be empty")
 
         result = self.__api_request_put(endpoint, values)
-        return result 
+        return result
 
     def product_variations(self, product_id):
         ''' Get all variations/combinations for a product
@@ -154,7 +154,6 @@ class EcwidAPI:
         result = self.__api_request_put(endpoint, values)
         return result
 
-
     def products(self):
         ''' Search for all products
             Returns: List[{product},{product}]
@@ -163,8 +162,8 @@ class EcwidAPI:
 
         result = self.__api_request_get('products')
         return result
-        
-    def products_by_keyword(self,keyword):
+
+    def products_by_keyword(self, keyword):
         ''' Search products by keyword
             Returns: List[{product},{product}]
         https://api-docs.ecwid.com/reference/products
@@ -190,16 +189,16 @@ class EcwidAPI:
     def __api_request_delete(self, endpoint):
         url = self.__get_feature_url(endpoint)
 
-        payload = { 'token': self.api_token }
+        payload = {'token': self.api_token}
         result = requests.delete(url, params=payload)
         return result
 
     def __api_request_get(self, endpoint, payload={}):
         feature_url = self.__get_feature_url(endpoint)
 
-        payload['token'] =  self.api_token
+        payload['token'] = self.api_token
         payload['limit'] = API_PAGE_LIMIT
-        
+
         if self.__endpoint_paging(endpoint):
             if self.debug:
                 print("Making request with paging ability")
@@ -208,16 +207,15 @@ class EcwidAPI:
             result = self.__api_request_get_unpaged(feature_url, payload, self.__endpoint_node(endpoint))
 
         if self.debug:
-            print ('Fetch returned: {0} Size: {1}'.format(type(result),len(result)))
+            print('Fetch returned: {0} Size: {1}'.format(type(result), len(result)))
 
         return result
 
     def __api_request_get_paged(self, url, payload, node):
         items = requests.get(url, params=payload)
-        
-        total_items = int(self.__get_response_if_ok(items,json=True)['total'])
 
-        #total_items = 100 #int(total_items) if total_items else 100
+        total_items = int(self.__get_response_if_ok(items, json=True)['total'])
+        # total_items = 100 #int(total_items) if total_items else 100
         if self.debug:
             print('Total items in request: {0}'.format(total_items))
             print('Collecting items from node: {0}'.format(node))
@@ -225,7 +223,7 @@ class EcwidAPI:
 
         for offset in range(0, total_items, API_PAGE_LIMIT):
             payload['offset'] = offset
-            #payload['limit'] = 100
+            # payload['limit'] = 100
             result = requests.get(url, params=payload)
 
             result = self.__get_response_if_ok(result, json=True)
@@ -263,7 +261,6 @@ class EcwidAPI:
             'products': 'items'
         }.get(endpoint, False)
 
-
     def __endpoint_paging(self, endpoint):
         '''If we need to use paging for an endpoint specify it here'''
         return {
@@ -293,8 +290,8 @@ class EcwidAPI:
         else:
             return False
 
-    def __get_response_if_ok(self,response,json=False):
-        if response.status_code == requests.codes.ok: # pylint: disable=no-member
+    def __get_response_if_ok(self, response, json=False):
+        if response.status_code == requests.codes.ok:  # pylint: disable=no-member
             if json:
                 return response.json()
             else:
@@ -307,8 +304,8 @@ class EcwidAPI:
             This endpoint is available to all tokens with public_storefront scope
         '''
         url = self.__get_feature_url('profile')
-        payload = { 'token': self.api_token }
+        payload = {'token': self.api_token}
+
         result = requests.get(url, params=payload)
         result = self.__get_response_if_ok(result)
         return
-    
