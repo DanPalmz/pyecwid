@@ -10,7 +10,7 @@ DEBUG = False
 
 class EcwidAPI:
 
-    def __init__(self, api_token, store_id):
+    def __init__(self, api_token, store_id, skip_test=False, base_url=API_BASE_URL):
         if type(api_token) == str:
             if api_token.startswith(('secret_','public_')):
                 self.api_token = api_token
@@ -20,8 +20,11 @@ class EcwidAPI:
             raise ValueError('api_token must be a valid string')
 
         self.store_id = self.__get_str_of_value_or_false(store_id)
-        self.base_url = API_BASE_URL.format(store_id)
+        self.base_url = base_url.format(store_id)
         self.debug = DEBUG
+        if not skip_test:
+            self.__test_api_key()
+
 
     def get_base_url(self):
         return(self.base_url)
@@ -242,7 +245,12 @@ class EcwidAPI:
 
 
     def __unpaged_api_request(self, url, payload, node):
-        result = requests.get(url, params=payload).json()
+        result = requests.get(url, params=payload)
+        
+        if result.status_code == requests.codes.ok: # pylint: disable=no-member
+            result = result.json()
+        else:
+            result.raise_for_status()
 
         if node:
             result = result[node]
@@ -251,7 +259,12 @@ class EcwidAPI:
 
         
     def __paged_api_request(self, url, payload, node):
-        total_items = int(requests.get(url, params=payload).json()['total'])
+        total_items = requests.get(url, params=payload)
+        
+        if total_items.status_code == requests.codes.ok: # pylint: disable=no-member
+            total_items = int(total_items.json()['total'])
+        else:
+            total_items.raise_for_status()
 
         #total_items = 100 #int(total_items) if total_items else 100
         if self.debug:
@@ -262,7 +275,13 @@ class EcwidAPI:
         for offset in range(0, total_items, API_PAGE_LIMIT):
             payload['offset'] = offset
             #payload['limit'] = 100
-            result = requests.get(url, params=payload).json()
+            result = requests.get(url, params=payload)
+            
+            if result.status_code == requests.codes.ok: # pylint: disable=no-member
+                result = result.json()
+            else:
+                result.raise_for_status()
+
             current_node = result.get(node)
             
             #print('My node type is: {0} Size: {1}'.format(type(current_node),len(current_node)))
@@ -276,6 +295,22 @@ class EcwidAPI:
     # def __get(self, url, object_hook=None):
     #     with urlopen(url) as resource:
     #         return json.load(resource, object_hook=object_hook)
+
+    def __test_api_key(self):
+        ''' Tests that the profile endpoint is available.
+            This endpoint is available to all tokens with public_storefront scope
+
+        '''
+
+        url = self.__get_feature_url('profile')
+        payload = { 'token': self.api_token }
+
+        result = requests.get(url, params=payload)
+
+        if result.status_code == requests.codes.ok: # pylint: disable=no-member
+            return True
+        else:
+            result.raise_for_status()
 
     def __get_str_of_value_or_false(self,item_id):
         ''' Sanity check.  
