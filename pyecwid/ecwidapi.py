@@ -9,8 +9,22 @@ API_PAGE_LIMIT = 100
 DEBUG = False
 
 class EcwidAPI:
+    """Python wrapper for Ecwid REST API.
 
-    def __init__(self, api_token, store_id):
+    Usage Example:
+        ::
+            from pyecwid import EcwidAPI
+            ecwid = EcwidAPI(api_token,store_id)
+    Arguments:
+        api_token:  The secret_ or public_ token for your store.
+        store_id:   The ID of your store.
+        skip_test:  Optional: skips test call to API during initiaization (used in tests)
+        base_url:   Optional: Replace the hard coded URL 
+                        Note: format includes {0} for store_id
+                        Eg: 'https://app.ecwid.com/api/v3/{0}/'
+    """
+
+    def __init__(self, api_token, store_id, skip_test=False, base_url=API_BASE_URL):
         if type(api_token) == str:
             if api_token.startswith(('secret_','public_')):
                 self.api_token = api_token
@@ -20,8 +34,11 @@ class EcwidAPI:
             raise ValueError('api_token must be a valid string')
 
         self.store_id = self.__get_str_of_value_or_false(store_id)
-        self.base_url = API_BASE_URL.format(store_id)
+        self.base_url = base_url.format(store_id)
         self.debug = DEBUG
+        if not skip_test: 
+            self.__test_api_key()
+
 
     def get_base_url(self):
         return(self.base_url)
@@ -34,7 +51,7 @@ class EcwidAPI:
         an "attributes" field which contains the common fields "Brand",
         "UPC" and also custom attributes.
         '''
-        result = self.__get_api_request('classes')
+        result = self.__api_request_get('classes')
         return result
 
 
@@ -48,8 +65,7 @@ class EcwidAPI:
             raise ValueError("product_id not a valid number", product_id)
         
         endpoint = 'products/' + product_id
-        #print(endpoint)
-        result = self.__get_api_request(endpoint)
+        result = self.__api_request_get(endpoint)
         return result
 
 
@@ -63,7 +79,7 @@ class EcwidAPI:
         elif len(product) == 0:
             raise ValueError("product should not be empty")
 
-        result = self.__post_api_request('products',product)
+        result = self.__api_request_post('products',product)
 
         if result.status_code != 200:
             raise UserWarning("Prouct not created.", result.status_code, result.text)
@@ -81,7 +97,7 @@ class EcwidAPI:
         else:
             endpoint = 'products/' + product_id
 
-        result = self.__delete_api_request(endpoint)
+        result = self.__api_request_delete(endpoint)
 
         if result.status_code != 200:
             raise UserWarning("Product not deleted.", result.status_code, result.text)
@@ -106,7 +122,7 @@ class EcwidAPI:
         elif len(values) == 0:
             raise ValueError("values should not be empty")
 
-        result = self.__put_api_request(endpoint,values)
+        result = self.__api_request_put(endpoint,values)
         return result 
 
     def product_variations(self,product_id):
@@ -119,7 +135,7 @@ class EcwidAPI:
             raise ValueError("product_id not a valid number", product_id)
         
         endpoint = 'products/' + product_id + '/combinations'
-        result = self.__get_api_request(endpoint)
+        result = self.__api_request_get(endpoint)
         return result
 
     def product_variation_update(self,product_id,varation_id,values):
@@ -139,7 +155,7 @@ class EcwidAPI:
 
         endpoint = 'products/' + product_id + '/combinations/' + varation_id
         
-        result = self.__put_api_request(endpoint,values)
+        result = self.__api_request_put(endpoint,values)
         return result
 
 
@@ -149,7 +165,7 @@ class EcwidAPI:
         https://api-docs.ecwid.com/reference/products
         '''
 
-        result = self.__get_api_request('products')
+        result = self.__api_request_get('products')
         return result
         
     def products_by_keyword(self,keyword):
@@ -159,7 +175,7 @@ class EcwidAPI:
         '''
         params = { 'keyword': keyword }
 
-        result = self.__get_api_request('products',params)
+        result = self.__api_request_get('products',params)
         return result 
 
     def products_by_params(self,params):
@@ -172,24 +188,17 @@ class EcwidAPI:
         if type(params) != dict:
             return
 
-        result = self.__get_api_request('products',params)
+        result = self.__api_request_get('products',params)
         return result 
 
-
-    def __delete_api_request(self, endpoint):
+    def __api_request_delete(self, endpoint):
         url = self.__get_feature_url(endpoint)
      
         payload = { 'token': self.api_token }
         result = requests.delete(url, params=payload)
         return result
 
-
-    def __get_feature_url(self, endpoint):
-        feature_url = urllib.parse.urljoin(self.base_url, endpoint)
-        return feature_url
-
-
-    def __get_api_request(self, endpoint, payload={}):
+    def __api_request_get(self, endpoint, payload={}):
         feature_url = self.__get_feature_url(endpoint)
 
         payload['token'] =  self.api_token
@@ -198,16 +207,52 @@ class EcwidAPI:
         if self.__endpoint_paging(endpoint):
             if self.debug:
                 print("Making request with paging ability")
-            result = self.__paged_api_request(feature_url, payload, self.__endpoint_node(endpoint))
+            result = self.__api_request_get_paged(feature_url, payload, self.__endpoint_node(endpoint))
         else:
-            result = self.__unpaged_api_request(feature_url, payload, self.__endpoint_node(endpoint))
+            result = self.__api_request_get_unpaged(feature_url, payload, self.__endpoint_node(endpoint))
 
         if self.debug:
             print ('Fetch returned: {0} Size: {1}'.format(type(result),len(result)))
 
         return result
 
-    def __post_api_request(self, endpoint, values):
+    def __api_request_get_paged(self, url, payload, node):
+        items = requests.get(url, params=payload)
+        
+        total_items = int(self.__get_response_if_ok(items,json=True)['total'])
+
+        #total_items = 100 #int(total_items) if total_items else 100
+        if self.debug:
+            print('Total items in request: {0}'.format(total_items))
+            print('Collecting items from node: {0}'.format(node))
+        all_items = []
+
+        for offset in range(0, total_items, API_PAGE_LIMIT):
+            payload['offset'] = offset
+            #payload['limit'] = 100
+            result = requests.get(url, params=payload)
+            
+            result = self.__get_response_if_ok(result,json=True)
+
+            current_node = result.get(node)
+
+            if self.debug:
+                print('Processed offset {0} collected {1} items'.format(offset,len(current_node)))
+
+            all_items += current_node
+        return all_items
+
+    def __api_request_get_unpaged(self, url, payload, node):
+        result = requests.get(url, params=payload)
+        
+        result = self.__get_response_if_ok(result,json=True)
+
+        if node:
+            result = result[node]
+
+        return result
+
+    def __api_request_post(self, endpoint, values):
         url = self.__get_feature_url(endpoint)
         
         payload = { 'token': self.api_token }
@@ -216,7 +261,7 @@ class EcwidAPI:
 
         return result
 
-    def __put_api_request(self, endpoint, values):
+    def __api_request_put(self, endpoint, values):
         url = self.__get_feature_url(endpoint)
         
         payload = { 'token': self.api_token }
@@ -224,7 +269,6 @@ class EcwidAPI:
         result = requests.put(url, params=payload, json=values)
 
         return result
-
 
     def __endpoint_node(self, endpoint):
         '''If we need the output from one node in an endpoints JSON return it here'''
@@ -240,42 +284,9 @@ class EcwidAPI:
             'classes': False
         }.get(endpoint, False)
 
-
-    def __unpaged_api_request(self, url, payload, node):
-        result = requests.get(url, params=payload).json()
-
-        if node:
-            result = result[node]
-
-        return result
-
-        
-    def __paged_api_request(self, url, payload, node):
-        total_items = int(requests.get(url, params=payload).json()['total'])
-
-        #total_items = 100 #int(total_items) if total_items else 100
-        if self.debug:
-            print('Total items in request: {0}'.format(total_items))
-            print('Collecting items from node: {0}'.format(node))
-        all_items = []
-
-        for offset in range(0, total_items, API_PAGE_LIMIT):
-            payload['offset'] = offset
-            #payload['limit'] = 100
-            result = requests.get(url, params=payload).json()
-            current_node = result.get(node)
-            
-            #print('My node type is: {0} Size: {1}'.format(type(current_node),len(current_node)))
-            if self.debug:
-                print('Processed offset {0} collected {1} items'.format(offset,len(current_node)))
-
-            all_items += current_node
-        
-        return all_items
-
-    # def __get(self, url, object_hook=None):
-    #     with urlopen(url) as resource:
-    #         return json.load(resource, object_hook=object_hook)
+    def __get_feature_url(self, endpoint):
+        feature_url = urllib.parse.urljoin(self.base_url, endpoint)
+        return feature_url
 
     def __get_str_of_value_or_false(self,item_id):
         ''' Sanity check.  
@@ -294,3 +305,25 @@ class EcwidAPI:
                 return False
         else:
             return False
+
+    def __get_response_if_ok(self,response,json=False):
+        if response.status_code == requests.codes.ok: # pylint: disable=no-member
+            if json:
+                return response.json()
+            else:
+                return response
+        else:
+            response.raise_for_status()
+
+    def __test_api_key(self):
+        ''' Tests that the profile endpoint is available.
+            This endpoint is available to all tokens with public_storefront scope
+        '''
+        url = self.__get_feature_url('profile')
+        payload = { 'token': self.api_token }
+
+        result = requests.get(url, params=payload)
+
+        result = self.__get_response_if_ok(result)
+
+    

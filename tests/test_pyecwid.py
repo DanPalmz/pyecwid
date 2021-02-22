@@ -14,7 +14,7 @@ SLEEP_TIME = 5
 
 @pytest.fixture
 def test_ecwid():
-    return EcwidAPI('public_1','my_store')
+    return EcwidAPI('public_1','my_store',skip_test=True)
 
 @pytest.fixture
 def live_ecwid():
