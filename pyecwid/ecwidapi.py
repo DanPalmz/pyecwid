@@ -247,10 +247,7 @@ class EcwidAPI:
     def __unpaged_api_request(self, url, payload, node):
         result = requests.get(url, params=payload)
         
-        if result.status_code == requests.codes.ok: # pylint: disable=no-member
-            result = result.json()
-        else:
-            result.raise_for_status()
+        result = self.__check_response_ok(result,json=True)
 
         if node:
             result = result[node]
@@ -259,12 +256,9 @@ class EcwidAPI:
 
         
     def __paged_api_request(self, url, payload, node):
-        total_items = requests.get(url, params=payload)
+        items = requests.get(url, params=payload)
         
-        if total_items.status_code == requests.codes.ok: # pylint: disable=no-member
-            total_items = int(total_items.json()['total'])
-        else:
-            total_items.raise_for_status()
+        total_items = int(self.__check_response_ok(items,json=True)['total'])
 
         #total_items = 100 #int(total_items) if total_items else 100
         if self.debug:
@@ -277,10 +271,7 @@ class EcwidAPI:
             #payload['limit'] = 100
             result = requests.get(url, params=payload)
             
-            if result.status_code == requests.codes.ok: # pylint: disable=no-member
-                result = result.json()
-            else:
-                result.raise_for_status()
+            result = self.__check_response_ok(result,json=True)
 
             current_node = result.get(node)
             
@@ -292,9 +283,15 @@ class EcwidAPI:
         
         return all_items
 
-    # def __get(self, url, object_hook=None):
-    #     with urlopen(url) as resource:
-    #         return json.load(resource, object_hook=object_hook)
+
+    def __check_response_ok(self,response,json=False):
+        if response.status_code == requests.codes.ok: # pylint: disable=no-member
+            if json:
+                return response.json()
+            else:
+                return response
+        else:
+            response.raise_for_status()
 
     def __test_api_key(self):
         ''' Tests that the profile endpoint is available.
@@ -307,10 +304,7 @@ class EcwidAPI:
 
         result = requests.get(url, params=payload)
 
-        if result.status_code == requests.codes.ok: # pylint: disable=no-member
-            return True
-        else:
-            result.raise_for_status()
+        result = self.__check_response_ok(result)
 
     def __get_str_of_value_or_false(self,item_id):
         ''' Sanity check.  
