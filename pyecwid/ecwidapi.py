@@ -9,6 +9,20 @@ API_PAGE_LIMIT = 100
 DEBUG = False
 
 class EcwidAPI:
+    """Python wrapper for Ecwid REST API.
+
+    Usage Example:
+        ::
+            from pyecwid import EcwidAPI
+            ecwid = EcwidAPI(api_token,store_id)
+    Arguments:
+        api_token:  The secret_ or public_ token for your store.
+        store_id:   The ID of your store.
+        skip_test:  Optional: skips test call to API during initiaization (used in tests)
+        base_url:   Optional: Replace the hard coded URL 
+                        Note: format includes {0} for store_id
+                        Eg: 'https://app.ecwid.com/api/v3/{0}/'
+    """
 
     def __init__(self, api_token, store_id, skip_test=False, base_url=API_BASE_URL):
         if type(api_token) == str:
