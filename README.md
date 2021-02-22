@@ -1,7 +1,7 @@
 # pyecwid
 Python wrapper for Ecwid REST API
 ## Requirements
-1. API token and Store ID from [Ecwid CP](https://my.ecwid.com/) Apps -> My Apps
+1. API token and Store ID from [Ecwid CP](https://my.ecwid.com/#develop-apps) Apps -> My Apps
 2. Python 3
 3. [Requests](https://pypi.org/project/requests/)
 ## Installation
@@ -24,6 +24,19 @@ $ python -m pip install pyecwid
  
 * Product types (classes)
     * product_classes() - return all configured product types in the store
+
+## Initialisation
+```python
+from pyecwid import EcwidAPI
+ecwid = EcwidAPI(api_token,store_id)
+```
+### EcwidAPI Aarguments
+| Argument | Required | Description | Default Value |
+|---|---|---|---|
+| api_token | Yes | The secret_ or public_ token for your store. | |
+| store_id | Yes | The ID of your store. | |
+| skip_test | No | True/False.  Skips test call to API during initiaization (used in tests) | False |
+| base_url | No | Replace the hard coded URL <br />Note: format includes {0} for store_id | `'https://app.ecwid.com/api/v3/{0}/'` |
 
 ### Sample:  Search products for items matching keyword 'sunglasses'
 ```python

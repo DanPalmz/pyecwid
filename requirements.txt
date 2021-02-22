@@ -1,4 +1,1 @@
-pytest
-pytest_dependency
-pytest_dotenv
 requests

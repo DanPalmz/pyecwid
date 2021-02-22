@@ -1,1 +1,1 @@
-from .ecwidapi import EcwidAPI
+from pyecwid.ecwidapi import EcwidAPI
