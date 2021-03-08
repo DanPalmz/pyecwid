@@ -80,14 +80,18 @@ def test_product_variation_update_malformed_variation_id_raises_error(test_ecwid
 
 
 def test_product_variation_update_empty_values_raises_error(test_ecwid):
-    with pytest.raises(Exception, match='values should not be empty') as e:
+    with pytest.raises(Exception, match='Dictionary paramater should not be empty') as e:
         result = test_ecwid.product_variation_update('1234', '1234', {})
         assert e.type is ValueError
 
+def test_product_variation_update_wrong_paramater_type_raises_error(test_ecwid):
+    with pytest.raises(Exception, match='Paramater must be a valid dictionary') as e:
+        result = test_ecwid.product_variation_update('1234', '1234', ['test'])
+        assert e.type is ValueError
 
 def test_product_add_empty_dict_raises_errors(test_ecwid):
     product = {}
-    with pytest.raises(Exception, match='product should not be empty') as e:
+    with pytest.raises(Exception, match='Dictionary paramater should not be empty') as e:
         result = test_ecwid.product_add(product)
         assert e.type is ValueError
 
@@ -101,7 +105,7 @@ def test_product_update_malformed_id_raises_errors(test_ecwid):
 
 def test_product_update_empty_dict_raises_errors(test_ecwid):
     product = {}
-    with pytest.raises(Exception, match='values should not be empty') as e:
+    with pytest.raises(Exception, match='Dictionary paramater should not be empty') as e:
         result = test_ecwid.product_update('1234', product)
         assert e.type is ValueError
 

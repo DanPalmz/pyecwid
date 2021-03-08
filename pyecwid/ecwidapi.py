@@ -1,6 +1,6 @@
-from collections.abc import Mapping
 import requests
 import urllib.parse
+from pyecwid.validators import paramater_validators as validator
 
 API_BASE_URL = 'https://app.ecwid.com/api/v3/{0}/'
 API_PAGE_LIMIT = 100
@@ -32,7 +32,7 @@ class EcwidAPI:
         else:
             raise ValueError('api_token must be a valid string')
 
-        self.store_id = self.__get_str_of_value_or_false(store_id)
+        self.store_id = validator.get_str_of_value_or_false(store_id)
         self.base_url = base_url.format(store_id)
         self.debug = DEBUG
         if not skip_test:
@@ -57,7 +57,7 @@ class EcwidAPI:
             Returns: {product}
         https://api-docs.ecwid.com/reference/products
         '''
-        product_id = self.__get_str_of_value_or_false(product_id)
+        product_id = validator.get_str_of_value_or_false(product_id)
         if not product_id:
             raise ValueError("product_id not a valid number", product_id)
 
@@ -70,10 +70,8 @@ class EcwidAPI:
             Returns product_id
             Requires product to be a dict with valid product structure
         '''
-        if not isinstance(product, Mapping):
-            raise ValueError("product format not valid")
-        elif len(product) == 0:
-            raise ValueError("product should not be empty")
+        if not validator.check_paramater_is_valid_dict(product):
+            return
 
         result = self.__api_request_post('products', product)
 
@@ -87,7 +85,7 @@ class EcwidAPI:
             Returns deleteCount int
         '''
 
-        product_id = self.__get_str_of_value_or_false(product_id)
+        product_id = validator.get_str_of_value_or_false(product_id)
         if not product_id:
             raise ValueError("product_id not a valid number", product_id)
         else:
@@ -104,16 +102,14 @@ class EcwidAPI:
         ''' Update a single product.
             Requires values to update in dict
         '''
-        product_id = self.__get_str_of_value_or_false(product_id)
+        product_id = validator.get_str_of_value_or_false(product_id)
         if not product_id:
             raise ValueError("product_id not a valid number", product_id)
         else:
             endpoint = 'products/' + product_id
 
-        if not isinstance(values, Mapping):
-            raise ValueError("values format not valid")
-        elif len(values) == 0:
-            raise ValueError("values should not be empty")
+        if not validator.check_paramater_is_valid_dict(values):
+            return
 
         result = self.__api_request_put(endpoint, values)
         return result
@@ -123,7 +119,7 @@ class EcwidAPI:
             Returns: List[{combinations}]
         https://api-docs.ecwid.com/reference/products
         '''
-        product_id = self.__get_str_of_value_or_false(product_id)
+        product_id = validator.get_str_of_value_or_false(product_id)
         if not product_id:
             raise ValueError("product_id not a valid number", product_id)
 
@@ -135,17 +131,16 @@ class EcwidAPI:
         ''' Update a single variation/combination on a product.
             Requires values to update in dict
         '''
-        product_id = self.__get_str_of_value_or_false(product_id)
+        product_id = validator.get_str_of_value_or_false(product_id)
         if not product_id:
             raise ValueError("product_id not a valid number", product_id)
 
-        varation_id = self.__get_str_of_value_or_false(varation_id)
+        varation_id = validator.get_str_of_value_or_false(varation_id)
         if not varation_id:
             raise ValueError("variation_id not a valid number", varation_id)
-        if not isinstance(values, Mapping):
-            raise ValueError("values format not valid")
-        elif len(values) == 0:
-            raise ValueError("values should not be empty")
+
+        if not validator.check_paramater_is_valid_dict(values):
+            return
 
         endpoint = 'products/' + product_id + '/combinations/' + varation_id
 
@@ -269,24 +264,6 @@ class EcwidAPI:
     def __get_feature_url(self, endpoint):
         feature_url = urllib.parse.urljoin(self.base_url, endpoint)
         return feature_url
-
-    def __get_str_of_value_or_false(self, item_id):
-        ''' Sanity check.
-        * Returns a string if int.
-        * Checks a string is intable.
-        * Returns false otherwise.
-        '''
-        if type(item_id) == int:
-            item_id = str(item_id)
-            return item_id
-        elif type(item_id) == str:
-            try:
-                int(item_id)
-                return item_id
-            except ValueError:
-                return False
-        else:
-            return False
 
     def __get_response_if_ok(self, response, json=False):
         if response.status_code == requests.codes.ok:  # pylint: disable=no-member
