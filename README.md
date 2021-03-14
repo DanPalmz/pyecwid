@@ -33,7 +33,7 @@ $ python -m pip install pyecwid
 | Customers | _alpha - currently unable to test_ | add, delete, get, get_by_id, get_by_keyword, update | get_by_email, get_by_name |
 | Orders |  _alpha - currently unable to test_ | add, delete, get, get_by_id, get_by_params, update | |
 | Products | working | add, delete, get, get_by_id, get_by_keyword, get_by_params, update | |
-| ProductTypes (classes) | _awaiting tests_ | add, delete, get, get_by_id, update | |
+| ProductTypes (classes) | working | add, delete, get, get_by_id, update | |
 
 
 ## Simple Initialisation
