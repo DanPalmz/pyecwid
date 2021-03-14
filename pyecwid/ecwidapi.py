@@ -49,70 +49,9 @@ class EcwidAPI:
         an "attributes" field which contains the common fields "Brand",
         "UPC" and also custom attributes.
         '''
-        result = self.__api_request_get('classes')
+        result = self.get_request('classes')
         return result
 
-    def product(self, product_id):
-        ''' Get product details
-            Returns: {product}
-        https://api-docs.ecwid.com/reference/products
-        '''
-        product_id = validator.get_str_of_value_or_false(product_id)
-        if not product_id:
-            raise ValueError("product_id not a valid number", product_id)
-
-        endpoint = 'products/' + product_id
-        result = self.__api_request_get(endpoint)
-        return result
-
-    def product_add(self, product):
-        ''' Adds a single product.
-            Returns product_id
-            Requires product to be a dict with valid product structure
-        '''
-        if not validator.check_paramater_is_valid_dict(product):
-            return
-
-        result = self.__api_request_post('products', product)
-
-        if result.status_code != 200:
-            raise UserWarning("Prouct not created.", result.status_code, result.text)
-
-        return result.json()['id']
-
-    def product_delete(self, product_id):
-        ''' Deletes a single product.
-            Returns deleteCount int
-        '''
-
-        product_id = validator.get_str_of_value_or_false(product_id)
-        if not product_id:
-            raise ValueError("product_id not a valid number", product_id)
-        else:
-            endpoint = 'products/' + product_id
-
-        result = self.__api_request_delete(endpoint)
-
-        if result.status_code != 200:
-            raise UserWarning("Product not deleted.", result.status_code, result.text)
-
-        return result.json()['deleteCount']
-
-    def product_update(self, product_id, values):
-        ''' Update a single product.
-            Requires values to update in dict
-        '''
-        product_id = validator.get_str_of_value_or_false(product_id)
-        if not product_id:
-            raise ValueError("product_id not a valid number", product_id)
-        else:
-            endpoint = 'products/' + product_id
-
-        if not validator.check_paramater_is_valid_dict(values):
-            return
-
-        result = self.__api_request_put(endpoint, values)
-        return result
 
     def product_variations(self, product_id):
         ''' Get all variations/combinations for a product
@@ -124,7 +63,7 @@ class EcwidAPI:
             raise ValueError("product_id not a valid number", product_id)
 
         endpoint = 'products/' + product_id + '/combinations'
-        result = self.__api_request_get(endpoint)
+        result = self.get_request(endpoint)
         return result
 
     def product_variation_update(self, product_id, varation_id, values):
@@ -144,49 +83,17 @@ class EcwidAPI:
 
         endpoint = 'products/' + product_id + '/combinations/' + varation_id
 
-        result = self.__api_request_put(endpoint, values)
+        result = self.put_request(endpoint, values)
         return result
 
-    def products(self):
-        ''' Search for all products
-            Returns: List[{product},{product}]
-        https://api-docs.ecwid.com/reference/products
-        '''
-
-        result = self.__api_request_get('products')
-        return result
-
-    def products_by_keyword(self, keyword):
-        ''' Search products by keyword
-            Returns: List[{product},{product}]
-        https://api-docs.ecwid.com/reference/products
-        '''
-        params = {'keyword': keyword}
-
-        result = self.__api_request_get('products', params)
-        return result
-
-    def products_by_params(self, params):
-        ''' Here be dragons!
-            Search products by paramaters specified in dict.
-            Eg:  { 'keyword': 'dragons', 'updatedFrom': '2011-05-01' }
-            Returns: List[{product},{product}]
-        https://api-docs.ecwid.com/reference/products
-        '''
-        if type(params) != dict:
-            return
-
-        result = self.__api_request_get('products', params)
-        return result
-
-    def __api_request_delete(self, endpoint):
+    def delete_request(self, endpoint):
         url = self.__get_feature_url(endpoint)
 
         payload = {'token': self.api_token}
         result = requests.delete(url, params=payload)
         return result
 
-    def __api_request_get(self, endpoint, payload={}):
+    def get_request(self, endpoint, payload={}):
         feature_url = self.__get_feature_url(endpoint)
 
         payload['token'] = self.api_token
@@ -236,13 +143,13 @@ class EcwidAPI:
             result = result[node]
         return result
 
-    def __api_request_post(self, endpoint, values):
+    def post_request(self, endpoint, values):
         url = self.__get_feature_url(endpoint)
         payload = {'token': self.api_token}
         result = requests.post(url, params=payload, json=values)
         return result
 
-    def __api_request_put(self, endpoint, values):
+    def put_request(self, endpoint, values):
         url = self.__get_feature_url(endpoint)
         payload = {'token': self.api_token}
         result = requests.put(url, params=payload, json=values)
