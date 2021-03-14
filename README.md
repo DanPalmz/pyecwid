@@ -9,8 +9,8 @@ Python wrapper for Ecwid REST API
 $ python -m pip install pyecwid
 ```
 ## ChangeLog
-Major changes (when 0.1.x released)
-* Broke up the different endpoints (Customers, Orders, Products, etc) into different classes that accept the EcwidAPI (or Mock) object.
+**BREAKING: Major changes (when 0.1.x released)**
+* Broke up the different endpoints (Customers, Orders, Products, etc) into different classes that accept the EcwidAPI (or EcwidAPIMock) object.
 * Added Mixins that can be used to quickly implement new Endpoints without duplicating code.
 * Added an Ecwid class that contains properties with each endpoint initialised.
 * Some methods have changed names.
