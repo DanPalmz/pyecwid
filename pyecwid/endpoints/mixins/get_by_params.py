@@ -1,4 +1,4 @@
-class EndpointByParams:
+class EndpointGetByParams:
     def get_by_params(self, params):
         ''' Here be dragons!
             Search endpoint by paramaters specified in dict.

@@ -1,4 +1,4 @@
-class EndpointByKeyword:
+class EndpointGetByKeyword:
     def get_by_keyword(self, keyword):
         if not self.endpoint:
             raise ValueError("endpoint not initialised")

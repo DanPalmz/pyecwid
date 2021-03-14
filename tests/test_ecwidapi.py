@@ -28,14 +28,6 @@ def dummy_product():
         return json.load(json_file)
 
 
-@pytest.fixture
-def dummy_product_id(dummy_product, live_ecwid):
-    dummy_product_sku = dummy_product['sku']
-    product_search = live_ecwid.products_by_keyword(dummy_product_sku)
-    if len(product_search) > 0:
-        return product_search[0]['id']
-
-
 def test_ecwidapi_requires_token_is_string():
     with pytest.raises(Exception, match='api_token must be a valid string') as e:
         error_ecwid = EcwidAPI(123456, '12345')
