@@ -127,3 +127,10 @@ def test_product_update_changes_values(live_ecwid, dummy_product_id):
 
     confirm_name_updated = live_ecwid.products.get_by_id(dummy_product_id)['name']
     assert confirm_name_updated == updated_data['name']
+
+def test_product_teardown(live_ecwid, dummy_product_id):
+    if dummy_product_id:
+        result = live_ecwid.products.delete(dummy_product_id)
+        assert result == 1, "1 item removed"
+    else:
+        pass
