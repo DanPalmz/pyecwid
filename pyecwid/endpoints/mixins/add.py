@@ -1,4 +1,6 @@
-class EndpointAddItem:
+from .endpoint_mixin import EndpointMixinBase
+
+class EndpointAddItem(EndpointMixinBase):
     def add(self, item):
         ''' Adds a single item.
             Returns item_id
@@ -8,7 +10,7 @@ class EndpointAddItem:
             raise ValueError("endpoint not initialised")
 
         if not self.validator.check_paramater_is_valid_dict(item):
-            return
+            return False
 
         result = self.api.post_request(self.endpoint, item)
 

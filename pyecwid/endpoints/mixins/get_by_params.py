@@ -1,4 +1,6 @@
-class EndpointGetByParams:
+from .endpoint_mixin import EndpointMixinBase
+
+class EndpointGetByParams(EndpointMixinBase):
     def get_by_params(self, params, collate_items=True):
         ''' Here be dragons!
             Search endpoint by paramaters specified in dict.

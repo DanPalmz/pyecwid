@@ -23,4 +23,3 @@ class EcwidMock():
         self.orders = Orders(self.api)
         self.products = Products(self.api)
         self.producttypes = ProductTypes(self.api)
-
