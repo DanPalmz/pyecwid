@@ -1,0 +1,30 @@
+{
+    "email": "example@example.com",
+    "password": "pyecwid-test",
+    "billingPerson": {
+        "name": "John Smith",
+        "companyName": "Imaginary Company",
+        "street": "Hedgehog Street, 1",
+        "city": "Bucket",
+        "countryCode": "US",
+        "postalCode": "90002",
+        "stateOrProvinceCode": "CA",
+        "phone": "11111111111"
+    },
+    "shippingAddresses": [
+        {
+            "name": "John Smith",
+            "companyName": "Imaginary Company",
+            "street": "W 3d st",
+            "city": "New York",
+            "countryCode": "US",
+            "postalCode": "10001",
+            "stateOrProvinceCode": "NY",
+            "phone": "11111111111"
+        }
+      ],
+    "taxId": "GB999 9999 73",
+    "taxExempt": true,
+    "taxIdValid": true,
+    "acceptMarketing": true
+}
