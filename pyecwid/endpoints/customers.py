@@ -1,8 +1,8 @@
 from pyecwid.endpoints import EcwidEndpoint
-from pyecwid.endpoints.mixins import (EndpointAddItem, EndpointDeleteItem, 
+from pyecwid.endpoints.mixins import (EndpointAddItem, EndpointDeleteItem,
     EndpointGetAll, EndpointGetById, EndpointGetByKeyword, EndpointUpdateItem)
-    
-class Customers(EcwidEndpoint, EndpointAddItem, EndpointDeleteItem, 
+
+class Customers(EcwidEndpoint, EndpointAddItem, EndpointDeleteItem,
     EndpointGetAll, EndpointGetById, EndpointGetByKeyword, EndpointUpdateItem):
     def __init__(self, api, validator=False):
         super().__init__(api, validator)

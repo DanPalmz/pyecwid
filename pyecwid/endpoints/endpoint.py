@@ -1,6 +1,6 @@
 class EcwidEndpoint:
     endpoint = ''
-    
+
     def __init__(self, api, validator):
         self.api = api
         if not validator:

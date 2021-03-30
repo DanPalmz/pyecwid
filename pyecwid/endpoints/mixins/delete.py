@@ -18,4 +18,3 @@ class EndpointDeleteItem:
             raise UserWarning("Product not deleted.", result.status_code, result.text)
 
         return result.json()['deleteCount']
-    

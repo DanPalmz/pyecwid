@@ -1,5 +1,5 @@
-import requests
 import urllib.parse
+import requests
 from pyecwid.validators import paramater_validators as validator
 
 API_BASE_URL = 'https://app.ecwid.com/api/v3/{0}/'
@@ -24,7 +24,7 @@ class EcwidAPI:
     """
 
     def __init__(self, api_token, store_id, skip_test=False, base_url=API_BASE_URL):
-        if type(api_token) == str:
+        if isinstance(api_token, str):
             if api_token.startswith(('secret_', 'public_')):
                 self.api_token = api_token
             else:
@@ -39,7 +39,7 @@ class EcwidAPI:
             self.__test_api_key()
 
     def get_base_url(self):
-        return(self.base_url)
+        return self.base_url
 
     def delete_request(self, endpoint):
         url = self.__get_feature_url(endpoint)

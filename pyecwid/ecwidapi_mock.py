@@ -8,7 +8,7 @@ DEBUG = True
 
 class EcwidAPIMock:
     def __init__(self, api_token='secret_123', store_id='1234', skip_test=True, base_url=API_BASE_URL):
-        if type(api_token) == str:
+        if isinstance(api_token, str):
             if api_token.startswith(('secret_', 'public_')):
                 self.api_token = api_token
             else:
@@ -30,7 +30,7 @@ class EcwidAPIMock:
 
         result = RequestResult(200, {'deleteCount': 1})
         return result
-        
+
     def get_request(self, endpoint, payload={}):
         feature_url = self.__get_feature_url(endpoint)
 
@@ -41,11 +41,11 @@ class EcwidAPIMock:
 
     def get_base_url(self):
         return(self.base_url)
-    
+
     def post_request(self, endpoint, values):
         url = self.__get_feature_url(endpoint)
         payload = {'token': self.api_token}
-        
+
         print(f'POST request: {url} with {payload}. \nValues:')
         print(values)
 
