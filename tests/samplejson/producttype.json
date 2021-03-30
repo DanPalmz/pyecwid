@@ -1,0 +1,25 @@
+{
+    "name": "T-Shirts",
+        "attributes": [
+            {
+                "name": "Gender",
+                "type": "CUSTOM",
+                "show": "DESCR"
+            },
+            {
+                "name": "Age group",
+                "type": "CUSTOM",
+                "show": "DESCR"
+            },
+            {
+                "name": "Color",
+                "type": "CUSTOM",
+                "show": "DESCR"
+            },
+            {
+                "name": "Size",
+                "type": "CUSTOM",
+                "show": "DESCR"
+            }
+          ]
+    }
