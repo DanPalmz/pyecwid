@@ -1,4 +1,4 @@
-class EndpointGetById:
+class EndpointGetByIdMixin:
     def get_by_id(self, item_id):
         if not self.endpoint:
             raise ValueError("endpoint not initialised")

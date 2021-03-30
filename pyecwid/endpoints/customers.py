@@ -1,9 +1,9 @@
 from pyecwid.endpoints import EcwidEndpoint
-from pyecwid.endpoints.mixins import (EndpointAddItem, EndpointDeleteItem,
-    EndpointGetAll, EndpointGetById, EndpointGetByKeyword, EndpointUpdateItem)
+from pyecwid.endpoints.mixins import (EndpointAddItemMixin, EndpointDeleteItemMixin,
+    EndpointGetAllMixin, EndpointGetByIdMixin, EndpointGetByKeywordMixin, EndpointUpdateItemMixin)
 
-class Customers(EcwidEndpoint, EndpointAddItem, EndpointDeleteItem,
-    EndpointGetAll, EndpointGetById, EndpointGetByKeyword, EndpointUpdateItem):
+class Customers(EcwidEndpoint, EndpointAddItemMixin, EndpointDeleteItemMixin,
+    EndpointGetAllMixin, EndpointGetByIdMixin, EndpointGetByKeywordMixin, EndpointUpdateItemMixin):
     def __init__(self, api, validator=False):
         super().__init__(api, validator)
         self.endpoint = 'customers'

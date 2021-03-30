@@ -1,4 +1,4 @@
-class EndpointAddItem:
+class EndpointAddItemMixin:
     def add(self, item):
         ''' Adds a single item.
             Returns item_id

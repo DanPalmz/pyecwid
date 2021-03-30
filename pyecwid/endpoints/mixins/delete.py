@@ -1,4 +1,4 @@
-class EndpointDeleteItem:
+class EndpointDeleteItemMixin:
     def delete(self, item_id):
         ''' Deletes a single item.
             Returns deleteCount int
