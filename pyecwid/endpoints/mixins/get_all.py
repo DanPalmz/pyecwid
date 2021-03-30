@@ -12,4 +12,4 @@ class EndpointGetAllUnpagedOnly:
             raise ValueError("endpoint not initialised")
 
         result = self.api.get_request(self.endpoint, collate_items=False)
-        return resultpyt
+        return result
