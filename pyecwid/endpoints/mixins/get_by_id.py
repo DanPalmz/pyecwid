@@ -1,5 +1,7 @@
 class EndpointGetByIdMixin:
     def get_by_id(self, item_id):
+        ''' Returns a single item details.
+        '''
         if not self.endpoint:
             raise ValueError("endpoint not initialised")
 

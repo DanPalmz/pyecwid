@@ -24,7 +24,7 @@ $ python -m pip install pyecwid
     * get_by_id(id) - get item details (returns a single {item})
     * update(id, {values}) - update item with values (dict)
 
-    * **Getting multiple items**:  Will deal with pagnation and return a list of "items" node.<br />*Optional: pass "collate_items=False" to any of these commands and full results will be returned.  Note - pagnation will not be handled automatically.   Useful to find total counts etc.*
+    * **Getting multiple items**:  Will deal with pagination and return a list of "items" node.<br />*Optional: pass "collate_items=False" to any of these commands and full results will be returned.  Note - pagination will not be handled automatically.   Useful to find total counts etc.*
         * get() - get all items 
         * get_by_keyword('keyword') - search for items by keyword 
         * get_by_params({params}) - search for items by paramaters (dict)
@@ -41,7 +41,7 @@ $ python -m pip install pyecwid
 ## Simple Initialisation
 ```python
 from pyecwid import Ecwid
-ecwid = Ecwid(api_token,store_id)
+ecwid = Ecwid(api_token, store_id)
 ```
 ### EcwidAPI Arguments
 | Argument | Required | Description | Default Value |
