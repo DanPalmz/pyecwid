@@ -10,5 +10,5 @@ class EndpointGetById:
 
         endpoint = self.join_endpoint(item_id)
 
-        result = self.api.get_request(endpoint)
+        result = self.api.get_request(endpoint, collate_items=False)
         return result

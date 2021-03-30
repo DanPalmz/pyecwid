@@ -21,11 +21,13 @@ $ python -m pip install pyecwid
 * Standard possible commands for endpoints:
     * add({item}) - add item (dict)
     * delete(id) - remove item
-    * get() - get all items
-    * get_by_id(id) - get item  details
-    * get_by_keyword('keyword') - search for items by keyword 
-    * get_by_params({params}) - search for items by paramaters (dict)
+    * get_by_id(id) - get item details (returns a single {item})
     * update(id, {values}) - update item with values (dict)
+
+    * **Getting multiple items**:  Will deal with pagnation and return a list of "items" node.<br />*Optional: pass "collate_items=False" to any of these commands and full results will be returned.  Note - pagnation will not be handled automatically.   Useful to find total counts etc.*
+        * get() - get all items 
+        * get_by_keyword('keyword') - search for items by keyword 
+        * get_by_params({params}) - search for items by paramaters (dict)
     
 | Endpoint | Status | Standard commands | Extra commands |
 |---|---|---|---|
@@ -41,7 +43,7 @@ $ python -m pip install pyecwid
 from pyecwid import Ecwid
 ecwid = Ecwid(api_token,store_id)
 ```
-### EcwidAPI Aarguments
+### EcwidAPI Arguments
 | Argument | Required | Description | Default Value |
 |---|---|---|---|
 | api_token | Yes | The secret_ or public_ token for your store. | |
