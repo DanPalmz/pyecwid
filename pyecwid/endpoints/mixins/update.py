@@ -1,6 +1,4 @@
-from .endpoint_mixin import EndpointMixinBase
-
-class EndpointUpdateItem(EndpointMixinBase):
+class EndpointUpdateItem:
     def update(self, item_id, values):
         ''' Update a single item.
             Requires values to update in dict
@@ -15,7 +13,7 @@ class EndpointUpdateItem(EndpointMixinBase):
             endpoint = self.join_endpoint(item_id)
 
         if not self.validator.check_paramater_is_valid_dict(values):
-            return False
+            return
 
         result = self.api.put_request(endpoint, values)
         return result

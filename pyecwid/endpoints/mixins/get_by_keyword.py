@@ -1,6 +1,4 @@
-from .endpoint_mixin import EndpointMixinBase
-
-class EndpointGetByKeyword(EndpointMixinBase):
+class EndpointGetByKeyword:
     def get_by_keyword(self, keyword, collate_items=True):
         if not self.endpoint:
             raise ValueError("endpoint not initialised")

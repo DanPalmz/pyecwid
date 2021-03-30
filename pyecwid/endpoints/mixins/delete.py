@@ -1,6 +1,4 @@
-from .endpoint_mixin import EndpointMixinBase
-
-class EndpointDeleteItem(EndpointMixinBase):
+class EndpointDeleteItem:
     def delete(self, item_id):
         ''' Deletes a single item.
             Returns deleteCount int
