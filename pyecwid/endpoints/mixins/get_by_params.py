@@ -1,8 +1,9 @@
 class EndpointGetByParamsMixin:
     def get_by_params(self, params, collate_items=True):
-        ''' Here be dragons!
+        ''' Searches endpoint with paramaters.
             Search endpoint by paramaters specified in dict.
             Eg:  { 'keyword': 'dragons', 'updatedFrom': '2011-05-01' }
+            Returns List of all [items] found unless collate_items=False.
         '''
         if not self.endpoint:
             raise ValueError("endpoint not initialised")
