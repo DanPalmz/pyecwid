@@ -1,3 +1,4 @@
+wheel
 pytest
 pytest_dependency
 pytest_dotenv
